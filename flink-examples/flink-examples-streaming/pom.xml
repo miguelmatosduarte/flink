@@ -32,6 +32,12 @@ under the License.
 	<artifactId>flink-examples-streaming_${scala.binary.version}</artifactId>
 	<name>flink-examples-streaming</name>
 
+	<properties>
+		<kafka.connector.version>1.9.1</kafka.connector.version>
+		<scala.binary.version>2.11</scala.binary.version>
+		<maven.assembly.plugin.version>2.4.1</maven.assembly.plugin.version>
+	</properties>
+
 	<packaging>jar</packaging>
 
 	<dependencies>
@@ -56,11 +62,11 @@ under the License.
 			<version>${project.version}</version>
 		</dependency>
 
-		<dependency>
+<!--		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-kafka-0.10_${scala.binary.version}</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+		</dependency>-->
 
 		<dependency>
 			<groupId>org.apache.flink</groupId>
@@ -90,6 +96,14 @@ under the License.
             <version>${project.version}</version>
         </dependency>
 
+		<!-- Kafka Connector -->
+		<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka -->
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-kafka_2.11</artifactId>
+			<version>${kafka.connector.version}</version>
+			<scope>compile</scope>
+		</dependency>
     </dependencies>
 
 	<build>
@@ -319,6 +333,29 @@ under the License.
 						</configuration>
 					</execution>
 
+					<!-- SocketWindowWordCountCustom -->
+					<execution>
+						<id>SocketWindowWordCountCustom</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>SocketWindowWordCountCustom</classifier>
+
+							<archive>
+								<manifestEntries>
+									<program-class>org.apache.flink.streaming.examples.socket.SocketWindowWordCountCustom</program-class>
+								</manifestEntries>
+							</archive>
+
+							<includes>
+								<include>org/apache/flink/streaming/examples/socket/SocketWindowWordCountCustom.class</include>
+								<include>org/apache/flink/streaming/examples/socket/SocketWindowWordCountCustom*.class</include>
+							</includes>
+						</configuration>
+					</execution>
+
 					<!-- TopSpeedWindowing -->
 					<execution>
 						<id>TopSpeedWindowing</id>
@@ -481,8 +518,40 @@ under the License.
 								<copy file="${project.basedir}/target/flink-examples-streaming_${scala.binary.version}-${project.version}-WindowJoin.jar" tofile="${project.basedir}/target/WindowJoin.jar" />
 								<copy file="${project.basedir}/target/flink-examples-streaming_${scala.binary.version}-${project.version}-WordCount.jar" tofile="${project.basedir}/target/WordCount.jar" />
 								<copy file="${project.basedir}/target/flink-examples-streaming_${scala.binary.version}-${project.version}-SocketWindowWordCount.jar" tofile="${project.basedir}/target/SocketWindowWordCount.jar" />
+								<copy file="${project.basedir}/target/flink-examples-streaming_${scala.binary.version}-${project.version}-SocketWindowWordCountCustom.jar" tofile="${project.basedir}/target/SocketWindowWordCountCustom.jar" />
 							</target>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Maven Assembly Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>${maven.assembly.plugin.version}</version>
+				<configuration>
+					<finalName>SocketWindowWordCountCustom</finalName>
+					<!-- get all project dependencies -->
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<!-- MainClass in mainfest make a executable jar -->
+					<archive>
+						<manifest>
+							<mainClass>org.apache.flink.streaming.examples.socket.SocketWindowWordCountCustom</mainClass>
+						</manifest>
+					</archive>
+
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<!-- bind to the packaging phase -->
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
